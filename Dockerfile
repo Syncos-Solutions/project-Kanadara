@@ -13,11 +13,11 @@ RUN npm ci --legacy-peer-deps
 # Copy the rest of the app
 COPY . .
 
-# Build the app
-RUN SKIP_PAYLOAD_INIT=true npm run dev
+# Build the app — run the *production build* script
+RUN SKIP_PAYLOAD_INIT=true npm run build
 
 # Expose port
 EXPOSE 3000
 
-# Start app
-CMD ["npm", "run", "serve"]
+# Start the production server
+CMD ["npm", "run", "start"]
