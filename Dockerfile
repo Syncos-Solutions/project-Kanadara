@@ -4,22 +4,20 @@ FROM node:18
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy package.json and lock file
 COPY package.json package-lock.json ./
 
-# Install dependencies with npm
-RUN npm ci --force
+# Install dependencies
+RUN npm ci --legacy-peer-deps
 
-
-
-# Copy the rest of your source code
+# Copy the rest of the app
 COPY . .
 
 # Build the app
 RUN SKIP_PAYLOAD_INIT=true npm run build
 
-# Expose the port
+# Expose port
 EXPOSE 3000
 
-# Serve the app (production)
+# Start app
 CMD ["npm", "run", "serve"]
