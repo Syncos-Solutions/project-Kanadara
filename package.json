@@ -19,7 +19,7 @@
     "start": "npm run serve",
     "eject": "yarn remove next react react-dom @next/eslint-plugin-next && ts-node eject.ts",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,js}\" dist/",
-    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only ./node_modules/.bin/payload generate:types",
+    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts SKIP_PAYLOAD_INIT=true ts-node --transpile-only ./node_modules/.bin/payload generate:types",
     "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only ./node_modules/.bin/payload generate:graphQLSchema",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
