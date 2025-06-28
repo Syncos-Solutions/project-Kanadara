@@ -14,24 +14,29 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 const start = async (): Promise<void> => {
-  const mongoURL = process.env.DATABASE_URI
-  if (!mongoURL) {
-    console.error('❌ DATABASE_URI is not set. Please check your .env or Railway env vars.')
-    process.exit(1)
-  }
+  // Skip Payload init during build
+  if (process.env.SKIP_PAYLOAD_INIT === 'true') {
+    console.log('⚠ Skipping Payload init because SKIP_PAYLOAD_INIT is true')
+  } else {
+    const mongoURL = process.env.DATABASE_URI
+    if (!mongoURL) {
+      console.error('❌ DATABASE_URI is not set. Please check your .env or Railway env vars.')
+      process.exit(1)
+    }
 
-  await payload.init({
-    secret: process.env.PAYLOAD_SECRET || 'developmentSecret',
-    mongoURL,
-    express: app,
-    onInit: () => {
-      payload.logger.info(`✅ Payload Admin URL: ${payload.getAdminURL()}`)
-    },
-  })
+    await payload.init({
+      secret: process.env.PAYLOAD_SECRET || 'developmentSecret',
+      mongoURL,
+      express: app,
+      onInit: () => {
+        payload.logger.info(`✅ Payload Admin URL: ${payload.getAdminURL()}`)
+      },
+    })
 
-  if (process.env.PAYLOAD_SEED === 'true') {
-    await seed(payload)
-    process.exit()
+    if (process.env.PAYLOAD_SEED === 'true') {
+      await seed(payload)
+      process.exit()
+    }
   }
 
   const nextApp = next({
