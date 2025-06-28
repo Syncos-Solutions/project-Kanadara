@@ -5,6 +5,7 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
+  height: 100%;
 
   @include small-break {
     margin: 0;
@@ -15,7 +16,7 @@
   background-color: var(--color-dark-50);
   width: 100%;
   max-width: 1560px;
-  max-height: 884px;
+  max-height: 1440px;
   display: flex;
   align-items: center;
 
@@ -73,6 +74,7 @@
     }
   }
 }
+
 
 .links {
   list-style: none;
