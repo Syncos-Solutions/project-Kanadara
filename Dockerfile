@@ -14,7 +14,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 
 # Build the app
-RUN SKIP_PAYLOAD_INIT=true npm run build
+RUN SKIP_PAYLOAD_INIT=true npm run dev
 
 # Expose port
 EXPOSE 3000
