@@ -1,18 +1,20 @@
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Use official Node.js image
+FROM node:18
 
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package.json and yarn.lock / package-lock.json
 COPY package.json yarn.lock ./
-RUN yarn install
 
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy the rest of the app source code
 COPY . .
-RUN yarn build
 
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-COPY --from=builder /app ./
-ENV NODE_ENV=production
-
+# Expose the port your app runs on
 EXPOSE 3000
 
-CMD ["node", "dist/server.js"]
+# Run your dev script (npm run dev or yarn dev)
+CMD ["yarn", "dev"]
