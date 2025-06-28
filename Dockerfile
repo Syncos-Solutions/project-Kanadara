@@ -13,6 +13,7 @@ COPY package.json package-lock.json ./
 # Set environment variables
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV SKIP_PAYLOAD_INIT=true
+ENV NODE_ENV=production
 
 # Install ALL dependencies first (including devDependencies for build)
 RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000
@@ -20,20 +21,14 @@ RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000
 # Copy source code
 COPY . .
 
-# Set production environment for build
-ENV NODE_ENV=production
+# Build only Next.js and copy files - skip TypeScript server compilation
+RUN npm run copyfiles && npm run build:next
 
-# Generate PayloadCMS types first, then build
-RUN npm run generate:types 2>/dev/null || echo "Types generation failed, continuing..." && \
-    npm run build:server && \
-    npm run copyfiles && \
-    npm run build:next
-
-# Remove dev dependencies to reduce image size
-RUN npm prune --production
+# Create a simple start script that uses ts-node for runtime
+RUN echo '#!/bin/sh\nexec npx ts-node --transpile-only src/server.ts' > start.sh && chmod +x start.sh
 
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "run", "start"]
+# Start with ts-node at runtime instead of compiled JS
+CMD ["./start.sh"]
