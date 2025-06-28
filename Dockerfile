@@ -23,8 +23,11 @@ COPY . .
 # Set production environment for build
 ENV NODE_ENV=production
 
-# Build only the essential parts - skip problematic payload build
-RUN npm run build:server && npm run copyfiles && npm run build:next
+# Generate PayloadCMS types first, then build
+RUN npm run generate:types 2>/dev/null || echo "Types generation failed, continuing..." && \
+    npm run build:server && \
+    npm run copyfiles && \
+    npm run build:next
 
 # Remove dev dependencies to reduce image size
 RUN npm prune --production
