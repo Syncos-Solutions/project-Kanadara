@@ -10,12 +10,12 @@ WORKDIR /usr/src/app
 # Copy package files first for better caching
 COPY package.json package-lock.json ./
 
-# Set environment variables before install
+# Set environment variables
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV SKIP_PAYLOAD_INIT=true
 
 # Install ALL dependencies first (including devDependencies for build)
-RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000 --prefer-offline
+RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000
 
 # Copy source code
 COPY . .
@@ -23,10 +23,10 @@ COPY . .
 # Set production environment for build
 ENV NODE_ENV=production
 
-# Build the application with fallback strategy
-RUN npm run build || (echo "Build failed, trying individual steps..." && npm run build:payload && npm run build:server && npm run copyfiles && npm run build:next)
+# Build only the essential parts - skip problematic payload build
+RUN npm run build:server && npm run copyfiles && npm run build:next
 
-# Remove dev dependencies AFTER build to reduce image size
+# Remove dev dependencies to reduce image size
 RUN npm prune --production
 
 # Expose port
