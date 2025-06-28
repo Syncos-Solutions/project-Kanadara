@@ -8,7 +8,8 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Install dependencies with npm
-RUN npm ci --legacy-peer-deps
+RUN npm ci --force
+
 
 
 # Copy the rest of your source code
