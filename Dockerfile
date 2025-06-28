@@ -1,11 +1,17 @@
-FROM node:18.8-alpine as base
+# Use a compatible Node version (>=18.12.0)
+FROM node:18.20.2-alpine as base
 
 FROM base as builder
 
 WORKDIR /home/node/app
 COPY package*.json ./
+COPY yarn.lock ./
+
+# Optional: remove package-lock.json if accidentally included
+RUN rm -f package-lock.json
 
 COPY . .
+
 RUN yarn install
 RUN yarn build
 
@@ -15,10 +21,11 @@ ENV NODE_ENV=production
 ENV PAYLOAD_CONFIG_PATH=dist/payload.config.js
 
 WORKDIR /home/node/app
-COPY package*.json  ./
+COPY package*.json ./
 COPY yarn.lock ./
 
 RUN yarn install --production
+
 COPY --from=builder /home/node/app/dist ./dist
 COPY --from=builder /home/node/app/build ./build
 
