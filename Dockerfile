@@ -1,23 +1,19 @@
-# Use official Node.js image
 FROM node:18
 
-# Set working directory
 WORKDIR /usr/src/app
 
-# Copy dependency definitions
-COPY package.json yarn.lock ./
+# Copy package.json + package-lock.json (instead of yarn.lock)
+COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
+# Install dependencies with npm
+RUN npm ci
 
-# Copy the entire app
 COPY . .
 
-# Build app (skip Payload init at build time)
-RUN SKIP_PAYLOAD_INIT=true yarn build
+# Build with npm (and skip Payload init during build)
+RUN SKIP_PAYLOAD_INIT=true npm run build
 
-# Expose port
 EXPOSE 3000
 
-# Start the production server
-CMD ["yarn", "serve"]
+# Serve the app
+CMD ["npm", "run", "serve"]
