@@ -7,29 +7,28 @@ RUN apk add --no-cache python3 make g++
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package.json package-lock.json ./
 
-# Install dependencies with increased memory and timeout
-RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000
+# Set environment variables before install
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+ENV SKIP_PAYLOAD_INIT=true
+
+# Install dependencies with optimized settings
+RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000 --prefer-offline
 
 # Copy source code
 COPY . .
 
-# Set build environment variables
-ENV NODE_ENV=production
-ENV SKIP_PAYLOAD_INIT=true
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Build with verbose logging and timeout handling
+RUN timeout 600 npm run build || (echo "Build timed out, retrying..." && npm run build:payload && npm run build:server && npm run copyfiles && npm run build:next)
 
-# Build the application
-RUN npm run build
+# Remove dev dependencies to reduce image size
+RUN npm prune --production
 
 # Expose port
 EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node healthcheck.js
 
 # Start the application
 CMD ["npm", "run", "start"]
