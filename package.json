@@ -4,23 +4,26 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts nodemon",
     "stripe:webhooks": "stripe listen --forward-to localhost:8000/stripe/webhooks",
-    "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node src/server.ts",
-    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node -r @swc/register --transpileOnly $(which payload) build",
+    "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only src/server.ts",
+    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts NODE_OPTIONS=\"--max-old-space-size=4096\" ts-node --transpile-only --compiler-options='{\"module\":\"commonjs\"}' ./node_modules/.bin/payload build",
     "build:server": "tsc --project tsconfig.server.json",
-    "build:next": "next build",
+    "build:next": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" next build",
     "build": "cross-env NODE_ENV=production SKIP_PAYLOAD_INIT=true npm run build:payload && npm run build:server && npm run copyfiles && npm run build:next",
     "serve": "cross-env PAYLOAD_CONFIG_PATH=dist/payload/payload.config.js NODE_ENV=production node dist/server.js",
     "start": "npm run serve",
     "eject": "yarn remove next react react-dom @next/eslint-plugin-next && ts-node eject.ts",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,js}\" dist/",
-    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node -r @swc/register --transpileOnly $(which payload) generate:types",
-    "generate:graphQLSchema": "PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node -r @swc/register --transpileOnly $(which payload) generate:graphQLSchema",
+    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only ./node_modules/.bin/payload generate:types",
+    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only ./node_modules/.bin/payload generate:graphQLSchema",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
-    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node -r @swc/register --transpileOnly payload"
+    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts ts-node --transpile-only ./node_modules/.bin/payload"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.828.0",
