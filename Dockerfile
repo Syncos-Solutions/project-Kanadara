@@ -11,20 +11,22 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Set environment variables before install
-ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV SKIP_PAYLOAD_INIT=true
 
-# Install dependencies with optimized settings
+# Install ALL dependencies first (including devDependencies for build)
 RUN npm ci --legacy-peer-deps --maxsockets 1 --network-timeout 600000 --prefer-offline
 
 # Copy source code
 COPY . .
 
-# Build with verbose logging and timeout handling
-RUN timeout 600 npm run build || (echo "Build timed out, retrying..." && npm run build:payload && npm run build:server && npm run copyfiles && npm run build:next)
+# Set production environment for build
+ENV NODE_ENV=production
 
-# Remove dev dependencies to reduce image size
+# Build the application with fallback strategy
+RUN npm run build || (echo "Build failed, trying individual steps..." && npm run build:payload && npm run build:server && npm run copyfiles && npm run build:next)
+
+# Remove dev dependencies AFTER build to reduce image size
 RUN npm prune --production
 
 # Expose port
